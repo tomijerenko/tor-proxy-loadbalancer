@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"net"
 	"net/http"
-	"time"
 )
 
 type LoadBalancer struct {
@@ -65,7 +64,6 @@ func Start(port string) {
 		},
 	}
 
-	time.Sleep(10 * time.Second)
 	for idx, _ := range lb.circuitPool {
 		lb.circuitPool[idx].Initialize()
 	}

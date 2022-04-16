@@ -18,7 +18,7 @@ build-release:
 
 docker-start:
 	DOCKER_BUILDKIT=1 docker build -t tor-loadbalancer .
-	DOCKER_BUILDKIT=1 docker build -t tor-circuit tor-sources/.
+	DOCKER_BUILDKIT=1 docker build -t tor-circuit tor-circuit/.
 	docker-compose up
 
 default: usage

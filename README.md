@@ -1,5 +1,5 @@
 # tor-proxy-loadbalancer
-Proxy and Loadbalancer Through TOR
+The tool is used as a proxy that load balances requests through randomly selected TOR circuits.
 
 Run `make` to see options
 
