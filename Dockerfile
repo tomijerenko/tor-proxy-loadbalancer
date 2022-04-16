@@ -18,14 +18,11 @@ RUN go build -ldflags "-w -s" -o loadbalancer cmd/loadbalancer/main.go
 ##               CREATE CONTAINER                ##
 ###################################################
 FROM alpine:${ALPINE_VERSION}
-
 RUN apk update
 RUN apk add --update docker openrc
 RUN rc-update add docker boot
-
 WORKDIR /app
 COPY --from=build /app/loadbalancer .
-
 EXPOSE 8080
 ENTRYPOINT ["./loadbalancer"]
 CMD ["8080"]
