@@ -1,4 +1,4 @@
-# tor_proxy-loadbalancer
+# tor-proxy-loadbalancer
 Proxy and Loadbalancer Through TOR
 
 Run `make` to see options
