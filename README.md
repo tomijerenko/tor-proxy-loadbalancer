@@ -4,7 +4,7 @@ The tool is used as a proxy that load balances requests through randomly selecte
 Run `make` to see options
 
 * Run: `make start`
-* Test: `curl --proxy localhost:8080 ip.me`
+* Test: `curl --proxy localhost:8080 check.torproject.org/api/ip`
 * Stop: `make stop`
 
 ### Notes
