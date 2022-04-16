@@ -9,4 +9,4 @@ Run `make` to see options
 
 
 ### Notes
-You can restart tor-circuit containers within tor-loadbalancer container. This recreates a circuit with a new IP.
+You can restart tor-circuit containers within tor-loadbalancer container. This recreates the circuits with new IPs.
