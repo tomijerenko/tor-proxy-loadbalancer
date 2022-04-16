@@ -1,0 +1,27 @@
+services:
+  loadbalancer:
+    image: tor-proxy
+    ports:
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+  circuitzero:
+    image: tor-circuit
+    ports:
+      - "9050"
+  circuitone:
+    image: tor-circuit
+    ports:
+      - "9050"
+  circuittwo:
+    image: tor-circuit
+    ports:
+      - "9050"
+  circuitthree:
+    image: tor-circuit
+    ports:
+      - "9050"
+  circuitfour:
+    image: tor-circuit
+    ports:
+      - "9050"

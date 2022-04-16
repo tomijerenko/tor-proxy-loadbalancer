@@ -2,65 +2,72 @@ package loadbalancer
 
 import (
 	"fmt"
+	"io"
 	"math/rand"
+	"net"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
+	"time"
 )
 
 type LoadBalancer struct {
-	port       string
-	serverPool []Server
+	port        string
+	circuitPool []TargetCircuit
 }
 
-type Server interface {
-	GetAddress() *url.URL
-}
-
-type TargetServer struct {
-	address string
-}
-
-// GetAddress of target server
-func (ts *TargetServer) GetAddress() *url.URL {
-	url, err := url.Parse(ts.address)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return url
-}
-
-// ScheduleNext target server
-func (lb *LoadBalancer) ScheduleNext() Server {
-	rnd := rand.Intn(len(lb.serverPool))
-	return lb.serverPool[rnd]
+// GetNextClient for tor circuit
+func (lb *LoadBalancer) GetNextCircuit() *TargetCircuit {
+	rnd := rand.Intn(len(lb.circuitPool))
+	return &lb.circuitPool[rnd]
 }
 
 // Serve to proxied target server
 func (lb *LoadBalancer) Serve(rw http.ResponseWriter, req *http.Request) {
-	fmt.Println(req.RemoteAddr)
-	fmt.Println(req.Method)
-	fmt.Println(req.URL)
-	fmt.Println(req.Header)
+	circuit := lb.GetNextCircuit()
+	req.RequestURI = ""
+	removeHopHeaders(req.Header)
 
-	// http client.do, then copy headers and body
+	if ip, _, err := net.SplitHostPort(req.RemoteAddr); err == nil {
+		setXForwardedFor(req.Header, ip)
+	}
 
-	proxy := httputil.NewSingleHostReverseProxy(lb.ScheduleNext().GetAddress())
-	proxy.ServeHTTP(rw, req)
+	response, err := circuit.client.Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer response.Body.Close()
+	removeHopHeaders(response.Header)
+
+	copyHeaders(rw.Header(), response.Header)
+	rw.WriteHeader(response.StatusCode)
+	io.Copy(rw, response.Body)
 }
 
 // Start load balancer
 func Start(port string) {
 	lb := &LoadBalancer{
 		port: port,
-		serverPool: []Server{
-			&TargetServer{
-				address: "http://localhost:8081",
+		circuitPool: []TargetCircuit{
+			TargetCircuit{
+				address: "circuitzero:9050",
 			},
-			&TargetServer{
-				address: "http://localhost:8082",
+			TargetCircuit{
+				address: "circuitone:9050",
+			},
+			TargetCircuit{
+				address: "circuittwo:9050",
+			},
+			TargetCircuit{
+				address: "circuitthree:9050",
+			},
+			TargetCircuit{
+				address: "circuitfour:9050",
 			},
 		},
+	}
+
+	time.Sleep(10 * time.Second)
+	for idx, _ := range lb.circuitPool {
+		lb.circuitPool[idx].Initialize()
 	}
 
 	http.HandleFunc("/", lb.Serve)
